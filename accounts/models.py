@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from back.managers import UserManager
 from django.db.models import QuerySet
 
+
 class CommentManager(models.Manager):
     def create_comment(self, name, text, rate):
         chat = self.create(name=name, text=text, rate=rate)
@@ -22,6 +23,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
 
 class Item(models.Model):
     name = models.CharField(max_length=63, verbose_name='Название')
@@ -42,9 +44,9 @@ class Item(models.Model):
         ('OT', 'Другие')
     ]
     category = models.CharField(max_length=2,
-                               choices=ITEM_CHOICES,
-                               default='OT',
-                               verbose_name='Категории',
+                                choices=ITEM_CHOICES,
+                                default='OT',
+                                verbose_name='Категории',
                                 )
 
     class Meta:
@@ -64,8 +66,6 @@ class ChatManager(models.Manager):
         return chat
 
 
-
-
 class Message(models.Model):
     sender = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель', null=True)
     text = models.CharField(max_length=2048, blank=False, null=True)
@@ -78,8 +78,10 @@ class Message(models.Model):
 
 class Chat(models.Model):
     objects = ChatManager()
-    user1 = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель1', null=True, related_name='user1')
-    user2 = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель2', null=True, related_name='user2')
+    user1 = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель1', null=True,
+                              related_name='user1')
+    user2 = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель2', null=True,
+                              related_name='user2')
     name1 = models.CharField(max_length=255, null=True, verbose_name='Название чата1')
     name2 = models.CharField(max_length=255, null=True, verbose_name='Название чата2')
     messages = models.ManyToManyField(
@@ -92,6 +94,7 @@ class Chat(models.Model):
     class Meta:
         verbose_name = 'Чат'
         verbose_name_plural = 'Чаты'
+
 
 class Order(models.Model):
     status = models.BooleanField(verbose_name='Статус покупки', default=False)
@@ -120,14 +123,15 @@ class Order(models.Model):
                                null=True)
     shipping_address = models.CharField(verbose_name='Адрес доставки', null=True, blank=True)
     way_of_shipping = models.CharField(max_length=3,
-                               choices=PAYMENT_CHOICES,
-                               default='BY',
-                               verbose_name='Роль',
-                               blank=True,
-                               null=True)
+                                       choices=PAYMENT_CHOICES,
+                                       default='BY',
+                                       verbose_name='Роль',
+                                       blank=True,
+                                       null=True)
     date_of_receive = models.DateField(verbose_name='Дата получения заказа', blank=True, null=True)
     total_price = models.FloatField(verbose_name='Общая стоимость', default=0)
     owner = models.ForeignKey('User', on_delete=models.deletion.CASCADE)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.CharField(max_length=20, unique=True)
@@ -138,16 +142,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('AD', 'Админ')
     ]
     role = models.CharField(max_length=3,
-                               choices=ROLE_CHOICES,
-                               default='BY',
-                               verbose_name='Роль',
-                               blank=False)
+                            choices=ROLE_CHOICES,
+                            default='BY',
+                            verbose_name='Роль',
+                            blank=False)
     is_staff = models.BooleanField('staff status', default=False)
     is_active = models.BooleanField('active', default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     address = models.CharField(max_length=300, null=True, blank=True)
-    phone_number = models.CharField(max_length=20, null = True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     card = models.CharField(max_length=20, null=True, blank=True)
     numbers_of_comments = models.IntegerField(default=0)
     rate = models.FloatField(default=0.0)
@@ -163,10 +167,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         verbose_name='Чаты'
     )
+
     # items =
     @property
     def get_items(self) -> QuerySet[Item]:
         return Item.objects.filter(farmer__email=self.email)
+
     def get_orders(self):
         return Order.objects.filter(owner__id=self.id)
 
@@ -181,6 +187,56 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return str(self.name)
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class OrderItems(models.Model):
+    objects = OrderItemsManager()
+    amount = models.IntegerField('Количество товара', default=0)
+    item = models.ForeignKey('Item', on_delete=models.deletion.CASCADE, verbose_name='Покупка')
+    farmer = models.ForeignKey('User', on_delete=models.deletion.CASCADE, verbose_name='Фермер')
+    user = models.ForeignKey('User', on_delete=models.deletion.CASCADE, verbose_name='Покупатель')
+
+
+class Message(models.Model):
+    sender = models.ForeignKey("User", on_delete=models.deletion.CASCADE, verbose_name='Отправитель', null=True)
+    text = models.CharField(max_length=2048, blank=False, null=True)
+    created_at = models.DateTimeField(auto_now=True, null=False, verbose_name='Дата отправки')
+
+    class Meta:
+        verbose_name = 'Сообщения'
+        verbose_name_plural = 'Сообщения'
+
+
+class ChatManager(models.Manager):
+    def create_chat(self, user1, user2, name1, name2):
+        chat = self.create(user1=user1, user2=user2, name1=name1, name2=name2)
+        return chat
+
+
+class Chat(models.Model):
+    objects = ChatManager()
+    user1 = models.ForeignKey(User, on_delete=models.deletion.CASCADE, verbose_name='Отправитель1', null=True,
+                              related_name='user1')
+    user2 = models.ForeignKey(User, on_delete=models.deletion.CASCADE, verbose_name='Отправитель2', null=True,
+                              related_name='user2')
+    name1 = models.CharField(max_length=255, null=True, verbose_name='Название чата1')
+    name2 = models.CharField(max_length=255, null=True, verbose_name='Название чата2')
+    messages = models.ManyToManyField(
+        "Message",
+        related_name="messages",
+        blank=True,
+        verbose_name='Сообщения'
+    )
+
+    class Meta:
+        verbose_name = 'Чат'
+        verbose_name_plural = 'Чаты'
+
+
+class Order(models.Model):
+    status = models.BooleanField('Статус покупки', default=False)
+    date = models.DateField()
