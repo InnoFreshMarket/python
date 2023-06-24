@@ -72,7 +72,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now=True, null=False, verbose_name='Дата отправки')
 
     class Meta:
-        verbose_name = 'Сообщения'
+        verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
 
 

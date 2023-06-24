@@ -39,3 +39,28 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['id'] = self.user.id
         return data
 
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.card = validated_data.get('card', instance.card)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = User
+        fields = ['email', 'name', 'role', 'address', 'phone_number', 'card', 'rate']
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'name', 'rate', 'text', 'date']
+
+    def create(self, validated_data):
+        item = Item.objects.create(
+            **validated_data
+        )
+
+        return item

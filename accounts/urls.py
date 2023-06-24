@@ -12,5 +12,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', MyTokenObtainPairView.as_view(), name='login'),
     path('refresh/', TokenRefreshView.as_view(), name='refresh'),
-
+    path('info/<int:user_id>', InfoView.as_view(), name='info'),
+    path('comments/<int:id>', CommentView.as_view(), name='comments'),
+    path('getId/', MyIdSet.as_view(), name='myid'),
 ]
