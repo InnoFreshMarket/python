@@ -17,5 +17,7 @@ urlpatterns = [
     path('to_order/<item_id>/<amount>', AddToOrder.as_view(), name='add_to_order'),
     path('orders/', OrdersView.as_view(), name='orders'),
     path('last_order/', LastOrderView.as_view(), name='last_order'),
+    path('get_chat/<int:user_id>', GetChatView.as_view(), name='get_chat'),
+    path('chat/<int:chat_id>', MessagesView.as_view(), name='chat'),
     path("", include(router.urls)),
 ]

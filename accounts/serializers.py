@@ -115,3 +115,9 @@ class ItemSerializer2(serializers.ModelSerializer):
         )
 
         return item
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['text', 'created_at', 'sender', 'id',]

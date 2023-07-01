@@ -170,3 +170,37 @@ class AddToOrder(APIView):
         uorder.total_price += item.cost_retail * float(amount)
         uorder.save()
         return Response(status=201)
+
+
+class MessagesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, chat_id):
+        chat = Chat.objects.get(id=chat_id)
+        messages = chat.messages.all()
+
+        res = MessageSerializer(messages, many=True)
+        return Response(
+            data={
+                'messages': res.data,
+            }, status=201)
+
+
+class GetChatView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        request_user = request.user
+        commonChats1 = user.chats.filter(user1=request_user.id)
+        commonChats2 = user.chats.filter(user2=request_user.id)
+
+        if commonChats1.count() == 0 and commonChats2.count() == 0:
+            new_chat = Chat.objects.create_chat(user, request_user, request_user.name, user.name)
+            user.chats.add(new_chat)
+            request_user.chats.add(new_chat)
+            return MessagesView.get(MessagesView, request=request, chat_id=new_chat.id)
+        elif commonChats1.count() == 1:
+            return MessagesView.get(MessagesView, request=request, chat_id=commonChats1.first().id)
+        else:
+            return MessagesView.get(MessagesView, request=request, chat_id=commonChats2.first().id)
