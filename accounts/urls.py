@@ -19,5 +19,9 @@ urlpatterns = [
     path('last_order/', LastOrderView.as_view(), name='last_order'),
     path('get_chat/<int:user_id>', GetChatView.as_view(), name='get_chat'),
     path('chat/<int:chat_id>', MessagesView.as_view(), name='chat'),
+    path('items/', ItemsView.as_view(), name='get_items'),
+    path('farmer/', ItemsView2.as_view(), name='get_items_farmer'),
+    path('chat/<int:chat_id>/post_message', PostMessageView.as_view(), name='post_message'),
+    path('chats/', ChatsView.as_view(), name='get_chats'),
     path("", include(router.urls)),
 ]

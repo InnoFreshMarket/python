@@ -121,3 +121,12 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['text', 'created_at', 'sender', 'id',]
+
+
+class ItemSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['id', 'name', 'cost_retail', 'cost_wholesale',
+                  'date', 'farmer', 'number', 'number_wholesale',
+                  'description', 'expire_date', 'number_for_month',
+                  'subscriptable', 'category', 'doc']

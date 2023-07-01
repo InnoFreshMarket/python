@@ -204,3 +204,117 @@ class GetChatView(APIView):
             return MessagesView.get(MessagesView, request=request, chat_id=commonChats1.first().id)
         else:
             return MessagesView.get(MessagesView, request=request, chat_id=commonChats2.first().id)
+
+
+class ItemsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        items = Item.objects.all()
+        serializer_context = {
+            'request': request,
+        }
+        res = ItemSerializer2(items,
+                             context=serializer_context,
+                             many=True)
+        return Response(
+            data = {
+                'items' : res.data,
+            },
+            status=201
+        )
+
+    def post(self, request):
+        try:
+            request.data._mutable = True
+        except:
+            pass
+        tokens = request.data['doc'].split(' ')
+        encoded = tokens[0]
+        file = ContentFile(base64.b64decode(encoded), name=tokens[1])
+        request.data['doc'] = file
+        serializer = ItemSerializer1(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = serializer.save()
+
+        return Response(
+            data={
+                'Status': 'OK',
+                'Name' : item.name
+            },
+            status=201
+        )
+
+class ItemsView2(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        items = request.user.get_items
+        serializer_context = {
+            'request': request,
+        }
+        res = ItemSerializer2(items,
+                             context=serializer_context,
+                             many=True)
+        return Response(
+            data = {
+                'items' : res.data,
+            },
+            status=201
+        )
+
+    def post(self, request):
+        try:
+            request.data._mutable = True
+        except:
+            pass
+
+        tokens = request.data['doc'].split(' ')
+        encoded = tokens[0]
+        file = ContentFile(base64.b64decode(encoded), name=tokens[1])
+        request.data['doc'] = file
+        serializer = ItemSerializer1(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = serializer.save()
+
+        return Response(
+            data={
+                'Status': 'OK',
+                'Name' : item.name
+            },
+            status=201
+        )
+
+
+class PostMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, chat_id):
+        try:
+            request.data._mutable = True
+        except:
+            pass
+        request.data.update({'sender': request.user.id})
+        chat = Chat.objects.get(id=chat_id)
+        serializer = MessageSerializer(data=request.data)
+        print(request.data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        chat.messages.add(message)
+        return Response(
+            status=201
+        )
+
+
+class ChatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        chats = []
+        for c in request.user.chats.all():
+            chats.append(Chat.objects.get(id=c.id))
+        res = ChatSerializer(chats, many=True)
+        return Response(
+            data={
+                'chats': res.data,
+            }, status=201)
