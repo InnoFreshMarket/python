@@ -116,3 +116,57 @@ class MyIdSet(APIView):
             },
             status=200
         )
+
+class LastOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        order = request.user.get_orders().last()
+        ser = OrderSerializer(order)
+        items = []
+        for item_id in ser.data['items']:
+            item = OrderItems.objects.get(id=item_id)
+            item = OrderItemsSerializer(item).data
+            product = ItemSerializer2(Item.objects.get(id=item['item'])).data
+            item['item'] = product
+            items.append(item)
+        b = ser.data
+        b['items'] = items
+        return Response(
+            data={'order': b},
+            status=201
+        )
+
+
+class OrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = request.user.get_orders()
+        ser = OrderSerializer(orders, many=True)
+        for i in range(len(ser.data)):
+            items = []
+            for item_id in ser.data[i]['items']:
+                item = OrderItems.objects.get(id=item_id)
+                item = OrderItemsSerializer(item).data
+                product = ItemSerializer2(Item.objects.get(id=item['item'])).data
+                item['item'] = product
+                items.append(item)
+            ser.data[i]['items'] = items
+        return Response(
+            data={'orders': ser.data},
+            status=201
+        )
+
+
+class AddToOrder(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, item_id, amount):
+        item = Item.objects.get(id=item_id)
+        order = OrderItems.objects.create_order_item(amount, item, item.farmer, request.user)
+        uorder = request.user.get_last_order()
+        uorder.items.add(order)
+        uorder.total_price += item.cost_retail * float(amount)
+        uorder.save()
+        return Response(status=201)
