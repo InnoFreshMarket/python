@@ -130,3 +130,9 @@ class ItemSerializer1(serializers.ModelSerializer):
                   'date', 'farmer', 'number', 'number_wholesale',
                   'description', 'expire_date', 'number_for_month',
                   'subscriptable', 'category', 'doc']
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chat
+        fields = ['user1', 'user2', 'name1', 'name2', 'id']
