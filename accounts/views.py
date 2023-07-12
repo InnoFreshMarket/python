@@ -367,11 +367,14 @@ class ChangeOrder(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        order = request.user.get_last_order()
         item = OrderItems.objects.get(id=request.data['id'])
         if item.user.id != request.user.id:
             return Response(status=404)
         change = float(request.data['change'])
         item.amount -= change
+        order.total_price -= change * item.item.cost_retail
+        order.save()
         item.save()
 
         if item.amount <= 0:
