@@ -40,6 +40,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 class UserInfoSerializer(serializers.ModelSerializer):
+
     def update(self, instance, validated_data):
         instance.address = validated_data.get('address', instance.address)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
@@ -49,7 +50,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'name', 'role', 'address', 'phone_number', 'card', 'rate']
+        fields = ['email', 'name', 'role', 'address', 'phone_number', 'card', 'rate', 'balance']
 
 
 class CommentSerializer(serializers.ModelSerializer):
