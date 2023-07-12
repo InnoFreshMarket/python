@@ -163,28 +163,6 @@ class ItemsView2(APIView):
             status=201
         )
 
-    def post(self, request):
-        try:
-            request.data._mutable = True
-        except:
-            pass
-
-        tokens = request.data['doc'].split(' ')
-        encoded = tokens[0]
-        file = ContentFile(base64.b64decode(encoded), name=tokens[1])
-        request.data['doc'] = file
-        serializer = ItemSerializer1(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        item = serializer.save()
-
-        return Response(
-            data={
-                'Status': 'OK',
-                'Name' : item.name
-            },
-            status=201
-        )
-
 
 class GetChatView(APIView):
     permission_classes = [IsAuthenticated]
