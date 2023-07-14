@@ -95,10 +95,10 @@ WSGI_APPLICATION = 'back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres4',
-        'USER': 'postgres',
-        'PASSWORD': '12345',
-        'HOST': 'localhost',
+        'NAME': 'innofarm',
+        'USER': 'innofarm_user',
+        'PASSWORD': 'gK2GdJlfPiqmMFChQNWgAwiypExjDDiW',
+        'HOST': 'dpg-cioge6lgkuvh5gnqtllg-a',
         'PORT': '5432'
     }
 }
